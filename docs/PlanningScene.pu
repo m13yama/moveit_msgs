@@ -1,0 +1,116 @@
+@startuml PlanningScene
+
+class PlanningScene {
+    string name
+    RobotState robot_state
+    string robot_model_name
+    geometry_msgs/TransformStamped[] fixed_frame_transforms
+    AllowedCollisionMatrix allowed_collision_matrix
+    LinkPadding[] link_padding
+    LinkScale[] link_scale
+    ObjectColor[] object_colors
+    PlanningSceneWorld world
+    bool is_diff
+}
+
+class RobotState {
+    sensor_msgs/JointState joint_state
+    sensor_msgs/MultiDOFJointState multi_dof_joint_state
+    AttachedCollisionObject[] attached_collision_objects
+    bool is_diff
+}
+
+class AttachedCollisionObject {
+    string link_name
+    CollisionObject object
+    string[] touch_links
+    trajectory_msgs/JointTrajectory detach_posture
+    float64 weight
+}
+
+class CollisionObject {
+    std_msgs/Header header
+    geometry_msgs/Pose pose
+    string id
+    object_recognition_msgs/ObjectType type
+
+    shape_msgs/SolidPrimitive[] primitives
+    geometry_msgs/Pose[] primitive_poses
+
+    shape_msgs/Mesh[] meshes
+    geometry_msgs/Pose[] mesh_poses
+
+    shape_msgs/Plane[] planes
+    geometry_msgs/Pose[] plane_poses
+
+    string[] subframe_names
+    geometry_msgs/Pose[] subframe_poses
+
+    byte ADD = 0
+    byte REMOVE = 1
+    byte APPEND = 2
+    byte MOVE = 3
+    byte operation
+}
+
+class AllowedCollisionMatrix {
+    string[] entry_names
+    AllowedCollisionEntry[] entry_values
+    string[] default_entry_names
+    bool[] default_entry_values
+}
+
+class AllowedCollisionEntry {
+    bool[] enabled
+}
+
+class LinkPadding {
+    string link_name
+    float64 padding
+}
+
+class LinkScale {
+    string link_name
+    float64 scale
+}
+
+class ObjectColor {
+    string id
+    ColorRGBA color
+}
+
+class PlanningSceneWorld {
+    CollisionObject[] collision_objects
+    OctomapWithPose octomap
+}
+
+class ColorRGBA {
+    float32 r
+    float32 g
+    float32 b
+    float32 a
+}
+
+class OctomapWithPose {
+    geometry_msgs/Pose pose
+    Octomap octomap
+}
+
+class Octomap <<external>>
+
+PlanningScene "1" --> "1" RobotState
+RobotState "1" --> "0..*" AttachedCollisionObject
+AttachedCollisionObject "1" --> "1" CollisionObject
+PlanningScene "1" --> "0..*" TransformStamped : fixed_frame_transforms
+PlanningScene "1" --> "1" AllowedCollisionMatrix
+PlanningScene "1" --> "0..*" LinkPadding
+PlanningScene "1" --> "0..*" LinkScale
+PlanningScene "1" --> "0..*" ObjectColor
+PlanningScene "1" --> "1" PlanningSceneWorld
+AllowedCollisionMatrix "1" --> "0..*" AllowedCollisionEntry : entry_values
+ObjectColor "1" --> "1" ColorRGBA : color
+PlanningSceneWorld "1" --> "0..*" CollisionObject : collision_objects
+PlanningSceneWorld "1" --> "0..1" OctomapWithPose : octomap
+OctomapWithPose "1" --> "0..1" Octomap
+
+@enduml
