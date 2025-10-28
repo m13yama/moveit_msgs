@@ -1,4 +1,5 @@
 @startuml PlanningScene
+skinparam dpi 600
 
 class PlanningScene {
     string name
